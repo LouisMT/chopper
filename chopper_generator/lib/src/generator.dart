@@ -188,6 +188,7 @@ class ChopperGenerator extends GeneratorForAnnotation<chopper.ChopperApi> {
         blocks.add(headers);
       }
 
+      final methodOptionalBody = getMethodOptionalBody(method);
       final methodName = getMethodName(method);
       final methodUrl = getMethodPath(method);
       final hasBody = body.isNotEmpty || fields.isNotEmpty;
@@ -210,7 +211,10 @@ class ChopperGenerator extends GeneratorForAnnotation<chopper.ChopperApi> {
             _generateList(parts, fileFields).assignFinal(_partsVar).statement);
       }
 
-      if (!hasBody && !hasParts && _methodWithBody(methodName)) {
+      if (!methodOptionalBody &&
+          !hasBody &&
+          !hasParts &&
+          _methodWithBody(methodName)) {
         _logger.warning(
           '$methodName $methodUrl\n'
           'Body is null\n'
@@ -489,6 +493,9 @@ bool _methodWithBody(String method) =>
     method == chopper.HttpMethod.Post ||
     method == chopper.HttpMethod.Patch ||
     method == chopper.HttpMethod.Put;
+
+bool getMethodOptionalBody(ConstantReader method) =>
+    method.read('optionalBody').boolValue;
 
 String getMethodPath(ConstantReader method) => method.read('path').stringValue;
 String getMethodName(ConstantReader method) =>
